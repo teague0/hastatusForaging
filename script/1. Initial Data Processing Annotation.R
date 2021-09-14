@@ -6,19 +6,16 @@ library(move)
 library(tidyverse)
 library(lubridate)
 
-ph <- move("./data/Greater spear-nosed bats Phyllostomus hastatus Bocas del Toro-6665207312962129521.zip")
-load("./processed data/Phast GPS w airspeed 20180303.Rdata") #This is a move object that includes environmental annotation from the Env-DATA service
+ph <- move("./data/Greater spear-nosed bats Phyllostomus hastatus Bocas del Toro-6665207312962129521.zip") #This is a move object that includes environmental annotation from the Env-DATA service
 
 droppedLocs <- read.csv("./data/Dropped Locations.csv") #locations that were dropped from analysis because they were the wrong tag type or were tag errors.
-ph_df <- as(ph, "data.frame") #set to data frame to make this easeir
+ph_df <- as(ph, "data.frame") #set to data frame to make this easier
 `%notin%` <- function(x,y) !(x %in% y) #Define a not in function
 hast_df <- ph_df[ph_df$event.id %notin% droppedLocs$x,] #There should be 237640 observations left.
+
 behavs <- read.csv("./data/SegmentedBehavior_eventIDs.csv") #manual segementation of major foraging vs commuting / direction
 hast_df <- hast_df %>% left_join(behavs)
 hast_df$height.calc <- hast_df$height.above.msl - hast_df$ASTER.ASTGTM2.Elevation
-
-
-#phas$timestamp15 <- ceiling_date(phas$timestamp, unit = "15 mins") #wind is in 15 min bins
 
 #Add local wind data from STRI (http://biogeodb.stri.si.edu/physical_monitoring/research/bocas)
 
@@ -117,3 +114,4 @@ hasLX <- lapply(hastL, function(x){
 }) 
 hast_mv <- moveStack(hasLX,  forceTz="UTC") #back to a move object
 hast_df <- as.data.frame(hast_mv) #and a dataframe
+write.csv(hast_df, file = "./data/Phyllostomus Hastatus Processed GPS Data S1.csv", row.names = FALSE)
