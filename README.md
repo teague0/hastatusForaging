@@ -5,3 +5,9 @@ Group foraging animals may change their spatial relationships in response to the
 
 
 ## Code was written & run on a Macbook Pro (OS 10.14.6) with 16 GB memory running R 4.0.2. Adjust & adapt as necessary, especially in code run with parallelized functions. 
+## Code assumes an organization structure based on an RProject file in base directory with subs named script, data, output.
+
+Script are organized as:
+1. Initial Data Processing Annotation.R
+2. HMM_CrawlPredictions.R
+3. HMM _fromPredictedData.R
