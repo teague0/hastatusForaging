@@ -1,4 +1,9 @@
 #Figure 3
+library(tidyverse)
+library(lme4)
+library(car)
+library(cowplot)
+theme_set(theme_cowplot())
 
 load("./processed data/NightlySummaries 2020-08-04.Rdata")
 

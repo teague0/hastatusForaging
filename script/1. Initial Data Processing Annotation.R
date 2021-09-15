@@ -1,5 +1,7 @@
 #This starts at the beginning and pulls in original Movebank data, drops unused locations (tags that weren't included, outlier points) & cleans up some names, etc.
 
+#Note that depending where / how the original GPS data were downloaded from Movebank, the names of the columns will either have underscores "_" or periods/full stops ".". This is a legacy issue of the API.
+
 #La Gruta location: points(x= -82.271541, y= 9.396448, col='red', pch=16)
 
 library(move)
@@ -86,6 +88,7 @@ crds <- as.data.frame(phas.ann@coords)
 phas.ann$utm.x <- crds$coords.x1 #27
 phas.ann$utm.y <- crds$coords.x2 #28
 phas.ann <- spTransform(phas.ann, CRS("+proj=longlat +datum=WGS84")) #convert back to longlat
+phas.ann$batIDday <- paste0(phas.ann$batID, ".", phas.ann$BatDay)
 
 #Calculate airspeed
 wind_support <- function(u,v,heading) {
