@@ -7,7 +7,6 @@ library(adehabitatHR)
 library(geosphere)
 
 load("./data/HastatusClusDist.Rdata") #The data with pairwise distances. Events duplicated.
-load(file="./data/HastatusHMMdbClus_flw.Rdata") #This only includes behaviour=="foraging" data. From 4. ClusterForaging.
 
 clusFrgFlw <- split(hastClass_df, f = hastClass_df$batIDday)
 
@@ -130,4 +129,4 @@ patchAreas <- patchAreas %>%
   mutate(patchDistToCave = spDists(SpatialPoints(cbind(patchCent.x, patchCent.y), proj4string = CRS("+proj=utm +zone=17 +datum=WGS84")), lagrutaUTM))
 
 hastP <- dplyr::left_join(hastClass_df, patchAreas, by = c("patchID" = "patchID"))
-save(hastP, file="./data/HastatusSegClusRelevel.Rdata")
+#save(hastP, file="./data/HastatusSegClusRelevel.Rdata")

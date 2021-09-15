@@ -6,7 +6,7 @@ library(cowplot)
 theme_set(theme_cowplot())
 
 
-## ** NOTE ** this data frame has duplicated locations to accommodate the multiple pairwise distances that were added when there were more than 2 bats tracked together on a night. This could be solved by turning into a wide data frame by event_id and throwing the other bat ids & distances out to columns.
+## ** NOTE ** this data frame has duplicated locations to accommodate the multiple pairwise distances that were added when there were more than 2 bats tracked together on a night. 
 
 load("./data/HastatusSegClusRelevel.Rdata")
 
@@ -23,8 +23,6 @@ partners <- forage[close,]
 partFreq <- partners %>% group_by(date=date(timestamps), batID, otherBat) %>%
   dplyr::summarise(n = n()) %>%
   mutate(freq = n / sum(n))
-partFreq <- partFreq %>% left_join(batgroups)
-
 
 #Are multiple groups tracked at the same time? No. There is no overlap among groups of tracking nights. Can only look at within group effects and then the lasting effect of the location. This could let us test if patch use is group specific or if everyone finds the same places. 
 groupNights <- forage %>% group_by(date=date(timestamps), groupID, batID) %>% 

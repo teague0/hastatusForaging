@@ -102,12 +102,8 @@ patchUsed <- hast_df %>% group_by(batID, batIDday, patchID) %>%
 
 nightVals <- timeRanges %>% left_join(firstLast)
 nightVals <- nightVals %>% left_join(patchUsed)
+#save(nightVals, file="./data/NightSummaries.Rdata")
 
 
-#Pause here & go to social networks from 10. DistanceSocNetworks
-#Add in the social network variables from 11
-socNet <- as.data.frame(observed)
-nightVals <- nightVals %>% left_join(socNet, by = c("batID" = "ID"))
-nightVals <- nightVals %>% left_join(patchCommun)
-save(nightVals, file="./data/NightSummaries.Rdata")
+
 

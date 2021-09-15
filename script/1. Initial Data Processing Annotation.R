@@ -2,8 +2,6 @@
 
 #Note that depending where / how the original GPS data were downloaded from Movebank, the names of the columns will either have underscores "_" or periods/full stops ".". This is a legacy issue of the API.
 
-#La Gruta location: points(x= -82.271541, y= 9.396448, col='red', pch=16)
-
 library(move)
 library(tidyverse)
 library(lubridate)

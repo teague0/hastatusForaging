@@ -2,8 +2,8 @@
 library(tidyverse)
 library(lme4)
 
-load("./processed data/Hastatus_PatchPartnersIDd.Rdata") #partners
-load("./processed data/HastatusSegStateBiodatPwr_ShortNightFilt_2020-08-09.Rdata") #hast_df
+load("./data/Hastatus_PatchPartnersIDd.Rdata") #partners from 8. DistancEffectsForaging
+load("./data/HastatusSegStateBiodatPwr.Rdata") #hast_df from 11. PowerEnergyEstimates
 groups <- hast_df %>% dplyr::group_by(batID) %>% 
   dplyr::summarize(groupID = unique(groupID))
 partners <- partners %>% left_join(groups)
