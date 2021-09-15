@@ -45,6 +45,9 @@ isla_box_map <- c(left = isla_box[1],
                   right = isla_box[2], 
                   top = isla_box[4] - 0.005)
 ctr <- c(-82.48, 9.42)
+
+#Note: using ggmamp and google products will require registering a personal API key.
+
 bocas_map2 <- get_map(batBox, source="stamen", maptype = "terrain")
 isla_map <- get_map(ctr, source="google", zoom = 14, maptype = "satellite")
 

@@ -10,7 +10,6 @@ hast_df <- read.csv("./data/Phyllostomus Hastatus Processed GPS Data S1.csv")
 hast_df$timestamp <- as.POSIXct(hast_df$timestamp, tz = "UTC")
 hast_df$timestamps <- as.POSIXct(hast_df$timestamps, tz = "UTC")
 
-hast_df$batIDday <- paste0(hast_df$batID, ".", hast_df$BatDay)
 #Re-classify some points for "X74F9F83.4" that are on Colón at the begin of commute
 forageDat <- hast_df %>% filter(behaviour=="forage") #use foraging data only
 hast_L <- split(hast_df, f=hast_df$batIDday)
@@ -35,4 +34,5 @@ hastLcrw <- mclapply(X=hast_L, mc.cores=detectCores()-2, FUN=function(batHMM) {
 })
 
 #save(hastLcrw, file = "./data/Hastatus Crawl Fits.Rdata")
+
 #Now move on to the HMM fits.
