@@ -1,11 +1,13 @@
-#Figure 3
+#Figure 3. Relationships between proximity network strength of individual bats and the proportion of time that they spend per night A) Resting, B) Moving between patch, C) slow foraging and feeding flight, and D) Commuting.
+
 library(tidyverse)
 library(lme4)
 library(car)
 library(cowplot)
 theme_set(theme_cowplot())
 
-load("./processed data/NightlySummaries 2020-08-04.Rdata")
+load("./data/NightlySummaries.Rdata")
+mycols <- viridisLite::viridis(6)[c(3, 4, 6)]
 
 actNet.r <- lmer(state1~strength + (1|batID), data = nightNets)
 Anova(actNet.r)
@@ -62,3 +64,9 @@ commute <- ggplot()+
         legend.background = element_blank())+
   labs(y = "proportion in commute", 
        x = "network strength")
+
+pdf("./output/Fig 3 - ActBudgNetStr_wide.pdf",  width = 12, height = 4)
+plot_grid(rest, moveF, forage, commute, labels = c('A', 'B', 'C', 'D'), label_size = 12, rows = 1)
+dev.off()
+
+

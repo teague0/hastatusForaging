@@ -1,8 +1,17 @@
 #Figure 4
+library(tidyverse)
+library(lme4)
+library(car)
+library(cowplot)
+theme_set(theme_cowplot())
 
-load("./processed data/NightlySummaries 2020-08-04.Rdata")
+load("./data/NightlySummaries.Rdata")
 
-kunz <- read.csv("./raw data/Kunz1998_DEE.csv")
+mlNeeded <- hastMorph$cumEE.kJ / 2.007818
+flwrNeeded <- mlNeeded / 5
+
+kunz <- read.csv("./data/Kunz1998_DEE.csv")
+mycols <- viridisLite::viridis(6)[c(3, 4, 6)]
 
 bocasPlot <- nightNets %>% dplyr::select(groupID, batID, timeTrack.min, dee.kJ)
 kunzPlot <- kunz %>% dplyr::select("groupID" = Harem, "batID"= bat1D, "dee.kJ"= dee.kJday, "timeTrack.min" = mins.out)
@@ -10,6 +19,10 @@ kunzPlot$groupID <- rep("Kunz")
 bocasKunzPlot <- bocasPlot %>% bind_rows(kunzPlot)
 
 t.m <- lmer(dee.kJ~timeTrack.min+(1|batID), data=nightNets)
+Anova(t.m)
+# Response: dee.kJ
+# Chisq Df Pr(>Chisq)    
+# timeTrack.min 11.025  1  0.0008988 ***
 plot.t.m <- data.frame(t.m@frame, fitted.re = fitted(t.m))
 
 kunzPlotCols <- c(mycols, "#FF0000")
@@ -33,8 +46,10 @@ summary(cl.m)
 Anova(flwr.m)
 # Response: nFeedingClusters
 # Chisq Df Pr(>Chisq)    
-# NFlowers 22.22  1  2.432e-06 ***
+# NFlowers 11.324  1  0.0007652 ***
 r.squaredGLMM(flwr.m)
+# R2m       R2c
+# [1,] 0.2431774 0.5888001
 
 plot.flwr.m <- data.frame(flwr.m@frame, fitted.re = fitted(flwr.m))
 
@@ -64,8 +79,8 @@ strDEE <- ggplot()+
 timeI <- lmer(timeTrack.min~strength+(1|batID), data=nightNets)
 Anova(timeI)
 # Response: timeTrack.min
-# Chisq Df Pr(>Chisq)  
-# strength 6.0706  1    0.01374 *
+# Chisq Df Pr(>Chisq)   
+# strength 7.0815  1   0.007788 **
 
 plot.timeI <- data.frame(timeI@frame, fitted.re = fitted(timeI))
 head(plot.timeI)

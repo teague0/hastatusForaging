@@ -1,13 +1,14 @@
 #Figure 2
 library(tidyverse)
 library(lme4)
+library(cowplot)
+theme_set(theme_cowplot())
 
 load("./data/Hastatus_PatchPartnersIDd.Rdata") #partners from 8. DistancEffectsForaging
 load("./data/HastatusSegStateBiodatPwr.Rdata") #hast_df from 11. PowerEnergyEstimates
 groups <- hast_df %>% dplyr::group_by(batID) %>% 
   dplyr::summarize(groupID = unique(groupID))
 partners <- partners %>% left_join(groups)
-
 
 mycols <- viridisLite::viridis(6)[c(3, 4, 6)]
 
