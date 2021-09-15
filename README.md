@@ -10,3 +10,9 @@ Script are organized as:
 1. Initial Data Processing Annotation.R
 2. HMM_CrawlPredictions.R
 3. HMM _fromPredictedData.R
+4. ClusterForaging.R
+5. ForagingMCPareas.R
+6. PairwiseDistances.R
+7. MergeForagingAreas.R
+8. DistanceEffectsForaging.R
+9. NightSummaries.R
