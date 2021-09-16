@@ -16,6 +16,7 @@ Script are organized as:
 7. MergeForagingAreas.R
 8. DistanceEffectsForaging.R
 9. NightSummaries.R
+<<<<<<< HEAD
 10. DistanceSocNetworks.R
 11. DistanceSocNetworks.R
 11. PowerEnergyEstimates.R
@@ -31,3 +32,5 @@ Figure S2.R
 pennypower_function.R
 powercurve_noplot.R
 SessionInfo.R
+=======
+>>>>>>> 4d25e16a2b0ff21bf1777c279f0f6ef90b6f4c7b
