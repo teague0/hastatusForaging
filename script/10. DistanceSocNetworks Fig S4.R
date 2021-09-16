@@ -131,6 +131,7 @@ observedPatch <- data.table(
 )
 save(observedPatch, file="./data/10_ObservedPatchSocNetworkMetrics.Rdata")
 
+# Figure S4. A) Proximity networks of simultaneous spatial associations (same space, same time); B) networks of across-night foraging patch associations (same space, different time). Individual bats are shown as part of their social group (group 1: blue square, group 2: green circle, group 3: yellow triangle. Foraging patch communities are highlighted by the size of their membership (community 1: red, community 2: green, community 3: purple).
 
 pdf("./output/SpatialPatchNetworks.pdf", width = 10, height = 6)
 par(mfrow=c(1,2))

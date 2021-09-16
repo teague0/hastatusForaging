@@ -12,7 +12,7 @@ theme_set(theme_cowplot())
 
 #https://www.datanovia.com/en/lessons/dbscan-density-based-clustering-essentials/#why-dbscan
 
-load("./data/4_HastatusGPS_HMMRelevelstates.Rdata")
+load("./data/3_HastatusGPS_HMMRelevelstates.Rdata")
 
 #One set of values for eps & minpts doesn't really work for all of the tracks. Looks like the break into eps = 5, 10, or 20. Plot diagnostic plots to help sort this out. This is commented out, but run if needed
 # mclapply(X=newStates, mc.cores = detectCores()-2, FUN = function(x){
@@ -105,5 +105,5 @@ hastAll_df <- do.call("rbind", newStates)
 forage_df <- do.call("rbind", clusFrgFlw)
 clusters <- forage_df %>% dplyr::select(event.id, dbClus:dbClus_feed4)
 hastClass_df <- left_join(hastAll_df, clusters)
-#save(hastClass_df, file="./data/4_HastatusHMMdbClus_flw.Rdata")
-#save(clusFrgFlw, file="./data/4_Clustering_ForagSites.Rdata")
+save(hastClass_df, file="./data/4_HastatusHMMdbClus_flw.Rdata")
+save(clusFrgFlw, file="./data/4_Clustering_ForagSites.Rdata")

@@ -38,7 +38,7 @@ hast_df$ptDistToCave <- spDists(SpatialPoints(cbind(hast_df$utm.x, hast_df$utm.y
 
 hast_df$groundSpeedRecalc <- hast_df$stepLength / hast_df$tlag
 hast_df$airspeedRecalc <- sqrt((hast_df$groundSpeedRecalc - hast_df$ws)^2 + (hast_df$cw)^2)
-#save(hast_df, file="./data/9_HastHMMdbClus_flwTrueTlagTrueGSAS.Rdata")
+save(hast_df, file="./data/9_HastHMMdbClus_flwTrueTlagTrueGSAS.Rdata")
 
 #Calculate time budgets ####
 timeRanges <- hast_df %>% group_by(groupID, batID, batIDday) %>% 
@@ -102,8 +102,4 @@ patchUsed <- hast_df %>% group_by(batID, batIDday, patchID) %>%
 
 nightVals <- timeRanges %>% left_join(firstLast)
 nightVals <- nightVals %>% left_join(patchUsed)
-#save(nightVals, file="./data/9_NightSummaries.Rdata")
-
-
-
-
+save(nightVals, file="./data/9_NightSummaries.Rdata")

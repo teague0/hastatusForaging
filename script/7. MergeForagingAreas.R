@@ -6,9 +6,9 @@ library(parallel)
 library(adehabitatHR)
 library(geosphere)
 
-load("./data/6_HastatusClusDist.Rdata") #The data with pairwise distances. Events duplicated.
+load("./data/6_HastatusClusDistPairDup.Rdata") #The data with pairwise distances. Events duplicated.
 
-clusFrgFlw <- split(hastClass_df, f = hastClass_df$batIDday)
+clusFrgFlw <- split(hastPairsDupLoc, f = hastPairsDupLoc$batIDday)
 
 #Calculate 100% MCP for each cluster 
 
@@ -69,7 +69,8 @@ ptCentrDist$type <- "point"
 ptCentrDist <-  ptCentrDist %>% mutate(same = ifelse(dist < 30, 0, 1))
 
 #Order the patches by timestamps
-patchInfo <- hastClass_df %>% dplyr::mutate(batIDday_clus=paste0(batIDday, ".", dbClus)) %>% 
+patchInfo <- hastPairsDupLoc %>% 
+  dplyr::mutate(batIDday_clus=paste0(batIDday, ".", dbClus)) %>% 
   dplyr::filter(dbClus > 0) %>%
   dplyr::group_by(batIDday_clus, dbClus) %>%
   dplyr::summarize(minTime = min(timestamps))
@@ -100,10 +101,10 @@ patchNames <- dplyr::bind_rows(xvals, yvals) %>%
                    patchCtr.x = mean(center.x),
                    patchCtr.y = mean(center.y)) %>% 
     arrange(patchID)
-hastClass_df$batIDday_clus <- paste0(hastClass_df$batIDday, ".", hastClass_df$dbClus)
-hastClass_df <- dplyr::left_join(hastClass_df, patchNames)
+hastPairsDupLoc$batIDday_clus <- paste0(hastPairsDupLoc$batIDday, ".", hastPairsDupLoc$dbClus)
+hastPairsDupLoc <- dplyr::left_join(hastPairsDupLoc, patchNames)
 
-forage <- hastClass_df %>% filter(behaviour == "forage")
+forage <- hastPairsDupLoc %>% filter(behaviour == "forage")
 #Recalculate patch areas from the re-classified patchIDs ####
 patchGPSptsL <- split(forage, f=forage$patchID) 
 patchAreaL <- lapply(patchGPSptsL, function(x){
@@ -128,5 +129,5 @@ lagrutaUTM <- spTransform(lagruta, CRS("+proj=utm +zone=17 +datum=WGS84"))
 patchAreas <- patchAreas %>% 
   mutate(patchDistToCave = spDists(SpatialPoints(cbind(patchCent.x, patchCent.y), proj4string = CRS("+proj=utm +zone=17 +datum=WGS84")), lagrutaUTM))
 
-hastP <- dplyr::left_join(hastClass_df, patchAreas, by = c("patchID" = "patchID"))
-#save(hastP, file="./data/7_HastatusSegClusRelevel.Rdata")
+hastP <- dplyr::left_join(hastPairsDupLoc, patchAreas, by = c("patchID" = "patchID"))
+save(hastP, file="./data/7_HastatusSegClusRelevel.Rdata")

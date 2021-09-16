@@ -11,17 +11,17 @@ library(cowplot)
 theme_set(theme_cowplot())
 
 #Load necessary data
-load("./processed data/HastatusSegStateBiodatPwr_ShortNightFilt_2020-08-09.Rdata") #hast_df
-panama_sf <- st_read("./QGIS/Panama_Province_Boundaries-shp/Province_Boundaries.shp")
-isla_sf <- st_read("./QGIS/shapefiles/almiranteIsla.shp")
-load("./processed data/PairwiseDistances.Rdata") #pair.distOG
+load("./data/11_HastatusSegStateBiodatPwr.Rdata") #hastMorph
+panama_sf <- st_read("./data/Panama_Province_Boundaries-shp/Province_Boundaries.shp") #CRS 32617
+isla_sf <- st_read("./data/shapefiles/almiranteIsla.shp")
+load("./data/6_PairwiseDistances.Rdata") #pair.dist
 
-bocas_sf <- panama_sf %>% dplyr::filter(NOMBRE == "Bocas del Toro")
-bocas_sf <- st_transform(bocas_sf, crs=32617)  #26917 was used before, but that NAD83
-bats_sf <- hast_df %>%  
-  st_as_sf(coords = c("utm.x", "utm.y"), crs=26917)
-bats_sf_ll <- hast_df %>%  
-  st_as_sf(coords = c("location_long", "location_lat"), crs=4326)
+bocas_sf <- panama_sf %>% dplyr::filter(NOMBRE == "Bocas del Toro")#UTM zone 17 NAD84 32617
+bocas_sf <- st_transform(bocas_sf, crs=32617) 
+bats_sf <- hastMorph %>%  
+  st_as_sf(coords = c("utm.x", "utm.y"), crs=32617)
+bats_sf_ll <- hastMorph %>%  
+  st_as_sf(coords = c("location.long", "location.lat"), crs=4326)
 
 #Crop Bocas del Toro province to the study area
 bats_bboxll <- st_bbox(bats_sf_ll)
@@ -74,7 +74,7 @@ bocasStudyMap <- ggmap(bocas_map2)+
                  st.dist = 0.04,
                  st.size = 8,
                  border.size = 0.5)+
-  geom_path(data = hast_df, 
+  geom_path(data = hastMorph, 
             aes(x = location_long, 
                 y = location_lat, 
                 group = batID, 
@@ -98,7 +98,7 @@ bocasStudyMap <- ggmap(bocas_map2)+
             ymax = isla_box[4], alpha = 0, size = 1, color = "black")+
   labs(x = "longitude", y = "latitude")
 
-yellow3bats <- hast_df %>% filter(batID %in% c("X74DE4E7", "X74D932E","X74DCBCC"))
+yellow3bats <- hastMorph %>% filter(batID %in% c("X74DE4E7", "X74D932E","X74DCBCC"))
 
 threeYlwBats <- ggmap(isla_map)+
   ggsn::scalebar(x.min = -82.50, x.max = -82.48,
@@ -132,11 +132,11 @@ threeYlwBats <- ggmap(isla_map)+
         axis.title = element_text(size = 20))+
   labs(x = "longitude", y = "latitude")
 
-nnDist <- pair.distOG %>% filter(date(timestamps) == "2016-03-04",
+nnDist <- pair.dist %>% filter(date(timestamps) == "2016-03-04",
                          bat1 %in% c("X74D932E", "X74DCBCC"),
                          bat2 %in% c("X74DE4E7", "X74D932E","X74DCBCC")) %>% 
   ggplot()+
-  geom_line(aes(x = timestamps, y = geo.dist/1000), size = 2)+
+  geom_line(aes(x = timestamps, y = geoDist/1000), size = 2)+
   labs(x = "hour of night", y = "distance between bats (km)")+
   scale_x_datetime(date_labels = "%H", timezone = "America/Panama")+ 
   facet_grid(bat1~bat2)+

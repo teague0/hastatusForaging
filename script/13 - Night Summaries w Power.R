@@ -1,4 +1,4 @@
-#This version of night summaries builds on #8 (recalculation of time lags, speeds, etc) and 10 to estimate energy consumption. 10 also reclassified some points into state1 based on the long time lags.
+#Create nightly summary tables.
 
 library(tidyverse)
 library(lubridate)
@@ -6,7 +6,6 @@ library(lme4)
 library(car)
 
 load("./data/11_HastatusSegStateBiodatPwr.Rdata") #hastMorph
-load("./processed data/LaGrutaCoords.Rdata")
 
 ##Night sums ####
 nightSums <- hastMorph %>% group_by(groupID, batID, batIDday) %>% 
@@ -32,22 +31,31 @@ nightSums <- hastMorph %>% group_by(groupID, batID, batIDday) %>%
   mutate(Pmet.unTracked.kJ = (timeLeftDay.min * 23.8/60 * bodymass)/1000, 
          dee.kJ = Pmet.unTracked.kJ + Pmet.kJ, 
          nFeedingClusters = nClus2 + nClus3 + nClus4)
+#Add in activity sums for each night.
+actBudg <- hastMorph %>% group_by(groupID, batID, batIDday, newState) %>% 
+  dplyr::summarize(nlocs = n()) %>% 
+  mutate(stateFreq = nlocs / sum(nlocs)) %>% 
+  dplyr::select(-nlocs) %>% 
+  pivot_wider(names_from = newState, values_from = stateFreq) %>% 
+  dplyr::select(-`NA`)
 
+nightSums <- nightSums %>% left_join(actBudg)
 
-#can I also add in time to first patch & first flower?
+  
+  #can I also add in time to first patch & first flower?
 
 firstPtchPt <- hastMorph %>% 
   filter(!is.na(patchID)) %>% 
   group_by(groupID, batID, batIDday) %>%
   slice(which.min(timestamp)) %>% 
-  dplyr::select(batID_day, firstPatch = patchID, firstPatchTimeUTC = timestamp, firstPatchDist = ptDistToCave)
+  dplyr::select(batIDday, firstPatch = patchID, firstPatchTimeUTC = timestamp, firstPatchDist = ptDistToCave)
 
 firstFlwPt <- hastMorph %>% 
   group_by(groupID, batID, batIDday, patchID) %>%
   gather("clustNum", "value", dbClus_feed2:dbClus_feed4 ) %>% 
   filter(value == 1) %>% 
   slice(which.min(timestamp)) %>% 
-  dplyr::select(batID_day, firstFlwPatch = patchID, firstFlwrID = value, firstFlwrTimeUTC = timestamp, firstFlwrDist = ptDistToCave)
+  dplyr::select(batIDday, firstFlwPatch = patchID, firstFlwrID = value, firstFlwrTimeUTC = timestamp, firstFlwrDist = ptDistToCave)
 
 firstPatchFlw <- left_join(firstPtchPt, firstFlwPt)
 nightSums <- left_join(nightSums, firstPatchFlw)
@@ -71,44 +79,14 @@ nightNets <- nightNets %>% mutate(firstFixDist = firstFixDist/1000,
                                   elapsedTimeFlw = firstFlwrTimeUTC - minTimeUTC,
                                   trackDistPatch = firstFixDist - firstPatchDist/1000,
                                   trackDistFlw = firstFixDist - firstFlwrDist/1000)
-#save(nightNets, file = "./data/13_NightSumValues.Rdata")
+save(nightNets, file = "./data/13_NightSumValues.Rdata")
 
 #These data are used for Figure 3, Figure 4, Figure S2
 
 
 ###Explore effects of time tracking ####
 tDist.m <- lmer(totalDistance~timeTrack.min+(1|batID), data=nightNets)
-Anova(tDist.m)
-# Response: totalDistance
-# Chisq Df Pr(>Chisq)    
-# timeTrack.min 50.543  1  1.166e-12 ***
-summary(tDist.m)
-
 fd.m <-  lmer(timeTrack.min~firstFixDist+(1|batID), data=nightNets)
-Anova(fd.m) #p=0.06595
-
 ld.m <-  lmer(timeTrack.min~lastFixDist+(1|batID), data=nightNets)
-Anova(ld.m) 
-# Response: timeTrack.min
-# Chisq Df Pr(>Chisq)    
-# lastFixDist 18.579  1   1.63e-05 ***
-
 t.m <- lmer(dee.kJ~timeTrack.min+(1|batID), data=nightNets)
-summary(t.m)
-Anova(t.m)
-# Response: dee.kJ
-# Chisq Df Pr(>Chisq)    
-# timeTrack.min 11.025  1  0.0008988 ***
-r.squaredGLMM(t.m)
-# R2m       R2c
-# [1,] 0.2754584 0.2754584
-
 e.m <- lmer(Pmet.kJ~timeTrack.min+(1|batID), data=nightNets)
-summary(e.m)
-Anova(e.m)
-# Response: Pmet.kJ
-# Chisq Df Pr(>Chisq)    
-# timeTrack.min 14.552  1  0.0001364 ***
-r.squaredGLMM(e.m)
-# R2m       R2c
-# [1,] 0.3341252 0.3341252

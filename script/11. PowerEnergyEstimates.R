@@ -1,7 +1,7 @@
 #Energetic costs of flights of Phyllostomus hastatus.
 library(tidyverse)
 
-load("./processed data/9_HastHMMdbClus_flwTrueTlagTrueGSAS.Rdata") #hast_df
+load("./data/9_HastHMMdbClus_flwTrueTlagTrueGSAS.Rdata") #hast_df
 source("./script/powercurve_noplot.R")
 phbiodat <- read.csv("./data/Hastatus loggers Recovered.csv")
 
@@ -27,12 +27,12 @@ curveDat <- do.call("rbind", allcurves)
 #Vmp & Vmr are repeated, so just summarize into a table to get those values
 
 pwrRange <- curveDat %>% group_by(x.batID) %>% 
-  summarize(Vmp = mean(Vmp),
+  dplyr::summarize(Vmp = mean(Vmp),
             Vmr = mean(Vmr))
-spdSums <- pwrRange %>% summarize(meanVmp = mean(MinPwrSpd),
-                                  sdVmp = sd(MinPwrSpd),
-                                  meanVmr = mean(MaxRgSpd), 
-                                  sdVmr = sd(MaxRgSpd))
+spdSums <- pwrRange %>% dplyr::summarize(meanVmp = mean(Vmp),
+                                  sdVmp = sd(Vmp),
+                                  meanVmr = mean(Vmr), 
+                                  sdVmr = sd(Vmr))
 
 ### Figure S1 ####
 # powerAllInds <- ggplot(curveDat, aes(x = V, y  = Pmech, group=x.batID))+
@@ -64,7 +64,6 @@ Pmet <- numeric(length = length(m))
 #Ep is the partial efficiency of the muscle. From Thomas 1975 for P. hastatus this ranges between mean value of 0.13 - 0.34. 0.23 or 0.18 are the bird values (ward 2001). 
 Ep <- 0.2466667
 Pmet <-  1.1*(((pwr)/Ep)+(23.8 / 360))
-
 hastMorph$Pmet <- Pmet
 
 #Phyllostomus metabolic power curves -- Thomas 1975 between 6-9 m/s
@@ -84,7 +83,7 @@ state1s <- which(hastMorph$newState == "state1")
 hastMorph$PmetTotal <- hastMorph$Pmet * hastMorph$tlag #convert W (J/s) to just joules
 hastMorph$PmetTotal[state1s] <- (23.8 / 360) * hastMorph$mass.deploy[state1s]* hastMorph$tlag[state1s]
 
-#save(hastMorph, file="./data/11_HastatusSegStateBiodatPwr.Rdata")
+save(hastMorph, file="./data/11_HastatusSegStateBiodatPwr.Rdata")
 
 #Just for fun -- exploration of Speakman & Thomas 2003 DEE estimates via body mass scaling.
 #Speakman & Thomas 2003
@@ -96,7 +95,6 @@ hastMorph$PmetTotal[state1s] <- (23.8 / 360) * hastMorph$mass.deploy[state1s]* h
 
 logSpeak <- 2.05 + 0.621 * log(phbiodat$mass.deploy)
 deeSpeak <- exp(logSpeak)
-
 
 bat.mass$log.Speak.KJ= 2.05 + 0.621 * log(bat.mass$Mb*1000)
 bat.mass$Speak.KJ=exp(bat.mass$log.Speak.KJ)

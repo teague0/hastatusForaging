@@ -21,7 +21,7 @@ clusMCPIDs <-  mclapply(X=clusFrgFlw, mc.cores = detectCores()-2, FUN = function
     clusNo <- seq(1:length(areas))
     IDs <- rep(ID, length(areas))
     counts <- z %>% dplyr::select(dbClus, newState) %>% 
-      count(dbClus, newState)
+      dplyr::count(dbClus, newState)
     pctStatePerClus <- counts %>% group_by(dbClus) %>% 
       mutate(percent = n / sum(n))
     pctsWide <- pctStatePerClus %>% spread(newState, percent)

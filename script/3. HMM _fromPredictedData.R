@@ -32,7 +32,7 @@ testmods <- mclapply(X=hastLcrw, mc.cores = detectCores()-2, FUN = function(batH
   },error=function(e) NULL)
 })
 
-save(testmods, file="./data/HMM_fullNights.Rdata")
+save(testmods, file="./data/3_HMM_fullNights.Rdata")
 
 ## HMM interpretation ####
 #The HMMs were fit per individual bat night. Because these were fit on individual nights, the state classifications are all over the place. They need to be re-ordered (or given some sort of behavior) to know what is going on. 
@@ -41,7 +41,7 @@ save(testmods, file="./data/HMM_fullNights.Rdata")
 hast_df <- read.csv("./data/Phyllostomus Hastatus Processed GPS Data S1.csv")
 hast_df$timestamp <- as.POSIXct(hast_df$timestamp, tz = "UTC")
 hast_df$timestamps <- as.POSIXct(hast_df$timestamps, tz = "UTC")
-load("./processed data/HMM_fullNights.Rdata")
+load("./processed data/3_HMM_fullNights.Rdata")
 
 #Extract table of the step values & it's state. Create a re-ordered newState to reflect low to high step lengths. 
 states <- lapply(testmods, function(x){
@@ -80,9 +80,8 @@ locsStates <- lapply(testmods, function(x){
 })
 
 fullDat <- do.call("rbind", locsStates)
-fullDat$batID_day <- as.character(fullDat$batIDday)
 hastdfHMM <- left_join(hast_df, fullDat, by = c("batIDday", "timestamps" = "time"))
-save(hastdfHMM, file="./processed data/HastatusGPS_HMMstates.Rdata")
+save(hastdfHMM, file="./data/3_HastatusGPS_HMMstates.Rdata")
 
 #Add in the re-leveled states
 hast_L <- split(hastdfHMM, f=hastdfHMM$batIDday)
@@ -92,4 +91,4 @@ newStates <- lapply(hast_L, function(x){
   batTable <- states_df %>% filter(batIDday == ID) %>% dplyr::select(states=stateID, newState, stateMean=mean)
   dat <-left_join(x, batTable, by = "states")
 })
-#save(newStates, file="./data/3_HastatusGPS_HMMRelevelstates.Rdata")
+save(newStates, file="./data/3_HastatusGPS_HMMRelevelstates.Rdata")

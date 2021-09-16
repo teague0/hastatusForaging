@@ -33,6 +33,6 @@ hastLcrw <- mclapply(X=hast_L, mc.cores=detectCores()-2, FUN=function(batHMM) {
   },error=function(e) finally = print(paste(id, "f'd up")))
 })
 
-#save(hastLcrw, file = "./data/2_Hastatus Crawl Fits.Rdata")
+save(hastLcrw, file = "./data/2_Hastatus Crawl Fits.Rdata")
 
 #Now move on to the HMM fits.

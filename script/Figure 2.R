@@ -1,13 +1,14 @@
-#Figure 2
+#Figure 2. Effects of proximity on bat activity budgets. A) Bat activity budgets when animals occupied different patches, and B) when they occupied the same patch. C) the frequency of observations of synchronized behavior when bats occupied the same patch. Note that Group 1 members never occupied the same patch together. D) Duration of continuous resting bouts relative to the distance to a bat's nearest neighbor
+
 library(tidyverse)
 library(lme4)
 library(cowplot)
 theme_set(theme_cowplot())
 library(gghalves)
 
-load("./data/Hastatus_PatchPartnersIDd.Rdata") #partners from 8. DistancEffectsForaging
-load("./data/HastatusSegStateBiodatPwr.Rdata") #hast_df from 11. PowerEnergyEstimates
-groups <- hast_df %>% dplyr::group_by(batID) %>% 
+load("./data/8_Hastatus_PatchPartnersIDd.Rdata") 
+load("./data/11_HastatusSegStateBiodatPwr.Rdata")
+groups <- hastMorph %>% dplyr::group_by(batID) %>% 
   dplyr::summarize(groupID = unique(groupID))
 partners <- partners %>% left_join(groups)
 
@@ -34,7 +35,6 @@ actBudgIn <- partners %>% filter(!is.na(samePatch)) %>%
        y = "frequency", 
        subtitle = "Activity budgets when animals\n occupy the same patches")+
   theme(legend.position = "none")
-
 
 actBudgOut <- partners %>% filter(!is.na(samePatch)) %>% 
   group_by(groupID, batID, batIDday, samePatch, newState) %>% 
@@ -63,38 +63,29 @@ actBudgOut <- partners %>% filter(!is.na(samePatch)) %>%
         legend.title = element_blank())
 
 # What about synchronization of behavior in a patch? ####
-load("./data/AllBatsSamePatch.Rdata")
+load("./data/12_AllBatsSamePatch.Rdata")
 inPatch <- forage %>% filter(samePatch == 1)
 inPatch$batStateRecode <- NA
-inPatch$otheBatStateRecode <- NA
+inPatch$otherBatStateRecode <- NA
 inPatch$sameBehav <- NA
 for(i in 1:length(inPatch$newState)){
   inPatch$batStateRecode[i] <- ifelse(inPatch$newState[i] == "state2", "forage", 
                                       ifelse(inPatch$newState[i] == "state3", "forage", inPatch$newState[i]))
-  inPatch$otheBatStateRecode[i] <- ifelse(inPatch$otherBatState[i] == "state2", "forage", 
+  inPatch$otherBatStateRecode[i] <- ifelse(inPatch$otherBatState[i] == "state2", "forage", 
                                           ifelse(inPatch$otherBatState[i] == "state3", "forage", inPatch$otherBatState[i]))
 }
 
-inPatch$sameBehav <- ifelse(inPatch$batStateRecode == inPatch$otheBatStateRecode,"sameBehav", "diffBehav")
+inPatch$sameBehav <- ifelse(inPatch$batStateRecode == inPatch$otherBatStateRecode,"sameBehav", "diffBehav")
 inPatch$sameBehav_orig <- ifelse(inPatch$newState == inPatch$otherBatState,"sameBehav", "diffBehav")
 
-
 sameSums <- inPatch %>% 
-  dplyr::group_by(groupID, batID, batIDday, newState, sameBehav_orig) %>% 
+  dplyr::group_by(groupID, batID, date=date(timestamp), newState, sameBehav_orig) %>% 
   dplyr::summarize(nObs = n()) %>% 
   ungroup() %>% 
-  dplyr::group_by(groupID,  batID, batIDday, newState) %>% 
+  dplyr::group_by(groupID, batID, date, newState) %>% 
   dplyr::mutate(totalN = sum(nObs), 
                 freq = nObs/totalN) %>% 
   dplyr::filter(sameBehav_orig == "sameBehav")
-
-#Lump the synchrony into rest vs other
-sameSums <- sameSums %>% mutate(restOther = ifelse(newState == "state1", "rest", "other" ))
-
-mS <- glmer(freq~restOther+(1|batID), family = binomial, data = sameSums)
-summary(mS)
-Anova(mS)
-
 
 library(gghalves)
 behavSameFreq <- sameSums %>% 

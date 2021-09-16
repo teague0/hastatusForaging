@@ -32,7 +32,7 @@ partners$samePatch <- NA
 for(i in 1:length(partners$patchID)){
   partners$samePatch[i] <- ifelse(partners$patchID[i] == partners$otherBatPatch[i], 1, 0)
 } 
-#save(partners, file="./data/8_Hastatus_PatchPartnersIDd.Rdata")
+save(partners, file="./data/8_Hastatus_PatchPartnersIDd.Rdata")
 
-## These results are used in part for Figure 2. Supporting statistical results are included in the Figure 2 script.
+## These results are used in part for Figure 2.
 

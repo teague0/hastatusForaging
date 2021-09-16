@@ -6,20 +6,12 @@ library(car)
 library(cowplot)
 theme_set(theme_cowplot())
 
-load("./data/NightlySummaries.Rdata")
+load("./data/13_NightSumValues.Rdata")
 mycols <- viridisLite::viridis(6)[c(3, 4, 6)]
 
 actNet.r <- lmer(state1~strength + (1|batID), data = nightNets)
-Anova(actNet.r)
-# Response: state1
-# Chisq Df Pr(>Chisq)  
-# strength 4.4804  1    0.03429 *
 plot.actNet.r <- data.frame(actNet.r@frame, fitted.re = fitted(actNet.r))
 actNet.m <- lmer(state3~strength + (1|batID), data = nightNets)
-Anova(actNet.m)
-# Response: state3
-# Chisq Df Pr(>Chisq)  
-# strength 4.5993  1    0.03198 *
 plot.actNet.m <- data.frame(actNet.m@frame, fitted.re = fitted(actNet.m))
 
 rest <- ggplot()+

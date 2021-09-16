@@ -1,5 +1,6 @@
 #Social influences on foraging & resting?
 #number of foraging / feeding positions when group members are nearby? How much resting? 
+#some information here is used for Figure 1.
 
 #mean foraging area size is 3522.231 ± 6226.811 m^2 (circle diameter of 66 m)
 
@@ -8,7 +9,7 @@ library(lubridate)
 library(raster)
 library(plyr)
 
-load("./processed data/4_HastatusHMMdbClus_flw.Rdata")
+load("./data/4_HastatusHMMdbClus_flw.Rdata")
 
 #I want to calculate the pairwise distance between all bats on a given day. Seems like the data should be split by date and then distances calculated.
 
@@ -30,6 +31,7 @@ pair.dist <- ddply(batsKeep, 'timestamps', function(t){
     return(pointDistance(pos.bat1, pos.bat2, lonlat = FALSE))})) # geographic distance between bats (in meters)
   combi$n.bats <- length(unique(t$batID)) # number of bats observed for this timestamp
   return(combi)})
+save(pair.dist, file = "./data/6_PairwiseDistances.Rdata")
 
 #The distances are given as unique combinations on each row (so the bat1-bat2 combo won't be repeated as bat2-bat1). To add this info to the main data, need to combine by timestamp and bat 1 and then bat2.
 
@@ -41,7 +43,6 @@ dat2 <- dplyr::left_join(dat, dist2, by=c("timestamps" = "timestamps", "batID"="
 #pull the pairs together into a single column.
 dat2$otherBat <- dplyr::coalesce(dat2$bat2, dat2$bat1)
 dat2$otherDist <- dplyr::coalesce(dat2$geoDist, dat2$geoDist2)
-#clean out those other columns and some other movebank stuff we really don't need.
 
-hastClass_df <- dat2
-#save(hastClass_df, file="./data/6_HastatusClusDist.Rdata")
+hastPairsDupLoc <- dat2
+save(hastPairsDupLoc, file="./data/6_HastatusClusDistPairDup.Rdata")

@@ -307,7 +307,6 @@ plot(model, log = "")
 
 # predictions and confidence intervals.
 demo.fits <- expand.grid(minDistNN=seq(0.1, 100, length=100))
-# new data with predictions
 pm <- predict(model, newdata=demo.fits, interval="confidence") 
 demo.fits$time <- pm
 demo.fits$pmin <- pm[,2]

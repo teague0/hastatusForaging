@@ -3,14 +3,9 @@
 library(tidyverse)
 library(lme4)
 
-load("./data/NightSumValues.Rdata")
+load("./data/13_NightSumValues.Rdata")
 
 ptchTdis.m <- lmer(nPatches~totalDistance + (1|batID), data=nightNets)
-Anova(ptchTdis.m) #The positive relationship is driven by distance flown
-summary(ptchTdis.m)
-# esponse: nPatches
-# Chisq Df Pr(>Chisq)    
-# totalDistance 12.103  1  0.0005033 ***
 plot.ptchTdis.m <- data.frame(ptchTdis.m@frame, fitted.re = fitted(ptchTdis.m))
 
 patchDist <- ggplot(nightNets, aes(x = totalDistance, y = nPatches, color = groupID))+
@@ -27,12 +22,7 @@ patchDist <- ggplot(nightNets, aes(x = totalDistance, y = nPatches, color = grou
   labs(x = "Distance moved per night (km)", 
        y = "Number of patches")
 
-
 cp.m <- lmer(nPatches~timeTrack.min+(1|batID), data=nightNets)
-summary(cl.m) 
-# Anova(cp.m)Response: nPatches
-# Chisq Df Pr(>Chisq)   
-# timeTrack.min 6.7079  1   0.009599 **
 plot.cp.m <- data.frame(cp.m@frame, fitted.re = fitted(cp.m))
 
 patchTime <- ggplot(nightNets, aes(x = timeTrack.min, y = nPatches, color = groupID))+
@@ -53,8 +43,6 @@ feedDist <- ggplot(nightNets, aes(x = totalDistance, y = nFeedingClusters, color
   labs(x = "Distance moved per night (km)", 
        y = "Number of feeding clusters")
 cl.m <- lmer(nFeedingClusters~totalDistance+(1|batID), data=nightNets)
-summary(cl.m) #no effect
-Anova(cl.m)
 
 clusPatch <- ggplot(nightNets, aes(x = nPatches, y = nFeedingClusters, color = groupID))+
   geom_point(size=3)+
@@ -64,8 +52,6 @@ clusPatch <- ggplot(nightNets, aes(x = nPatches, y = nFeedingClusters, color = g
   labs(x = "Number of foraging patches", 
        y = "Number of feeding clusters")
 clusPat.m <- lmer(nFeedingClusters~nPatches+(1|batID), data=nightNets)
-summary(cl.m) #no effect
-Anova(clusPat.m)
 
 pdf("./output/Fig S2 - PatchClusterTimeDist.pdf", width = 8, height = 8)
 plot_grid(patchDist, patchTime, feedDist, clusPatch,labels = c('A', 'B', 'C', 'D'), label_size = 12,  ncol=2)
