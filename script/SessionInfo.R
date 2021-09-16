@@ -1,4 +1,4 @@
-#Session Info
+#Session Info for packages used in analysis
 
 # R version 4.0.2 (2020-06-22)
 # Platform: x86_64-apple-darwin17.0 (64-bit)

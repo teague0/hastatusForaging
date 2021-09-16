@@ -1,4 +1,4 @@
-#Flower power
+#Flower power: calculate energy potential from balsa trees.
 
 #Derive the energy content per ml of balsa nectar from Kays et al 2012
 # - Total nectar produced by a flower is *estimated* at 25.5 ml

@@ -5,7 +5,6 @@ library(parallel)
 library(cowplot)
 theme_set(theme_cowplot())
 
-
 ## ** NOTE ** this data frame has duplicated locations to accommodate the multiple pairwise distances that were added when there were more than 2 bats tracked together on a night. 
 
 load("./data/7_HastatusSegClusRelevel.Rdata")

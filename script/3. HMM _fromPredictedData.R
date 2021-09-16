@@ -93,5 +93,3 @@ newStates <- lapply(hast_L, function(x){
   dat <-left_join(x, batTable, by = "states")
 })
 #save(newStates, file="./data/3_HastatusGPS_HMMRelevelstates.Rdata")
-
-

@@ -45,8 +45,3 @@ dat2$otherDist <- dplyr::coalesce(dat2$geoDist, dat2$geoDist2)
 
 hastClass_df <- dat2
 #save(hastClass_df, file="./data/6_HastatusClusDist.Rdata")
-
-
-
-
-

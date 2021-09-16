@@ -8,7 +8,6 @@ library(car)
 load("./data/11_HastatusSegStateBiodatPwr.Rdata") #hastMorph
 load("./processed data/LaGrutaCoords.Rdata")
 
-
 ##Night sums ####
 nightSums <- hastMorph %>% group_by(groupID, batID, batIDday) %>% 
   dplyr::summarise(minTimeUTC = min(timestamps),

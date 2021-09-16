@@ -340,5 +340,3 @@ dev.off()
 png("./output/Fig 2 - Distance Effects on Behavior.png", width = 1600, height = 1600)
 plot_grid(top_row, bottom_row, label_size = 12, nrow = 2)
 dev.off()
-
-

@@ -37,5 +37,3 @@ clusMCPIDs <-  mclapply(X=clusFrgFlw, mc.cores = detectCores()-2, FUN = function
 
 foragingArea <- do.call("rbind", clusMCPIDs)
 save(foragingArea, file="./data/5_ForagingMCPAreas_states.Rdata")
-
-

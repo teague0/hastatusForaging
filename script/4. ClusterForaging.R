@@ -107,5 +107,3 @@ clusters <- forage_df %>% dplyr::select(event.id, dbClus:dbClus_feed4)
 hastClass_df <- left_join(hastAll_df, clusters)
 #save(hastClass_df, file="./data/4_HastatusHMMdbClus_flw.Rdata")
 #save(clusFrgFlw, file="./data/4_Clustering_ForagSites.Rdata")
-
-

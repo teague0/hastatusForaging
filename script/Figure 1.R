@@ -1,4 +1,5 @@
-#Figure 1
+#Figure 1.  A) Tracking overview with individuals colored by group membership. B) The island in the Changuinola river (Isla Changuinola) shown with three individuals from group 3 on 2016-03-04, and C) the pairwise distances between these three individuals across that night.
+
 library(tidyverse)
 library(lubridate)
 library(sf)

@@ -65,7 +65,6 @@ metFlwrNClust <- ggplot()+
   labs(x = "Number of full flowers needed", 
        y = "Number of feeding clusters used")
 
-
 strDEE <- ggplot()+
   geom_point(data= nightNets, aes(x = strength, y = dee.kJ, color = groupID), size=3)+
   scale_color_manual(values = mycols, name = "Group")+

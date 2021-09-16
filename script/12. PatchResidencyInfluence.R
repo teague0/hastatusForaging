@@ -61,8 +61,6 @@ patchStay_df <- do.call("rbind", forageLx)
 
 #save(patchStay_df, file="./data/12_AllBatsPatchStateSeq.Rdata")
 
-
-
 ### I want to summarize how much time is spent in each state per bout and how many bats are in the same patch as the focal.
 ### Would like to add in if there were other bats in the patch at the same time. This probably needs to come from the 7-6 patchStay that had all combinations of bats in a patch. Then reduce it down to add here.
 
