@@ -7,6 +7,7 @@ Group foraging animals may change their spatial relationships in response to the
 This code was written & run on a Macbook Pro (OS 10.14.6) with 16 GB memory running R 4.0.2 by MTO. Please see the SessionInfo script for package versions. Adjust & adapt as necessary, especially in code run with parallelized functions. This code assumes an organization structure based on an RProject file in base directory with subs named script, data, output. In most instances, intermediate files are written as .Rdata files to preserve formatting of timestamps.
 
 Script are organized as:
+SessionInfo.R
 1. Initial Data Processing Annotation.R
 2. HMM_CrawlPredictions.R
 3. HMM _fromPredictedData.R
@@ -16,9 +17,7 @@ Script are organized as:
 7. MergeForagingAreas.R
 8. DistanceEffectsForaging.R
 9. NightSummaries.R
-<<<<<<< HEAD
 10. DistanceSocNetworks.R
-11. DistanceSocNetworks.R
 11. PowerEnergyEstimates.R
 12. PatchResidencyInfluence.R
 13 - Night Summaries w Power.R
@@ -31,6 +30,5 @@ Figure 4.R
 Figure S2.R
 pennypower_function.R
 powercurve_noplot.R
-SessionInfo.R
 =======
 >>>>>>> 4d25e16a2b0ff21bf1777c279f0f6ef90b6f4c7b
