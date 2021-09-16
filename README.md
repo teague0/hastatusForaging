@@ -30,5 +30,3 @@ Figure 4.R
 Figure S2.R
 pennypower_function.R
 powercurve_noplot.R
-=======
->>>>>>> 4d25e16a2b0ff21bf1777c279f0f6ef90b6f4c7b
