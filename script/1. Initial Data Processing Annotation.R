@@ -13,7 +13,7 @@ ph_df <- as(ph, "data.frame") #set to data frame to make this easier
 `%notin%` <- function(x,y) !(x %in% y) #Define a not in function
 hast_df <- ph_df[ph_df$event.id %notin% droppedLocs$x,] #There should be 237640 observations left.
 
-behavs <- read.csv("./data/SegmentedBehavior_eventIDs.csv") #manual segementation of major foraging vs commuting / direction
+behavs <- read.csv("./data/SegmentedBehavior_eventIDs.csv") #manual segmentation of major foraging vs commuting / direction
 hast_df <- hast_df %>% left_join(behavs)
 hast_df$height.calc <- hast_df$height.above.msl - hast_df$ASTER.ASTGTM2.Elevation
 
@@ -69,6 +69,7 @@ phas.ann$ground.speed <- unlist(lapply(speed(phas.ann), c, NA))
 phas.ann$stepLength <- unlist(lapply(distance(phas.ann), c, NA))
 phas.ann$angle <- unlist(lapply(angle(phas.ann), c, NA))
 phas.ann$batID <- phas.ann@trackId
+
 #Add in Bat Day
 moveList <- lapply(split(phas.ann), function(myInd){
   datechange <- c(0, abs(diff(as.numeric(as.factor(date(myInd@timestamps-(12*60*60)))))))

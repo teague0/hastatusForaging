@@ -53,7 +53,7 @@ bocas_map2 <- get_map(batBox, source="stamen", maptype = "terrain")
 isla_map <- get_map(ctr, source="google", zoom = 14, maptype = "satellite")
 
 # Create Figure 1 with all tracks map ####
-mycols <- viridisLite::viridis(6)[c(3, 4, 6)]
+mycols <- viridisLite::plasma(9)[c(1, 5, 8)]
 
 #Manually extract the min / max extents of bocas_map2 to force scalebar into correct placement.
 map_xmin <- -82.55
@@ -75,11 +75,11 @@ bocasStudyMap <- ggmap(bocas_map2)+
                  st.size = 8,
                  border.size = 0.5)+
   geom_path(data = hastMorph, 
-            aes(x = location_long, 
-                y = location_lat, 
+            aes(x = location.long, 
+                y = location.lat, 
                 group = batID, 
                 color = groupID), 
-            alpha = 0.8, size = 1)+
+            alpha = 0.6, size = 1)+
   scale_color_manual(values = mycols, 
                      name = "", 
                      breaks = c("blue", "brown", "yellow"),
@@ -115,11 +115,11 @@ threeYlwBats <- ggmap(isla_map)+
                  border.size = 0.5)+
   geom_sf(data = isla_sf, color = "white", fill = NA, inherit.aes = FALSE)+
   geom_path(data = yellow3bats,
-            aes(x = location_long,
-                y = location_lat,
+            aes(x = location.long,
+                y = location.lat,
                 group = batID,
                 color = batID),
-            alpha = 0.8, 
+            alpha = 0.6, 
             size = 2)+
   scale_color_brewer(palette = "OrRd", 
                      guide = guide_legend(override.aes = list(size = 3)))+
@@ -141,14 +141,15 @@ nnDist <- pair.dist %>% filter(date(timestamps) == "2016-03-04",
   scale_x_datetime(date_labels = "%H", timezone = "America/Panama")+ 
   facet_grid(bat1~bat2)+
   theme(strip.background = element_blank(),
-        strip.text = element_text(size = rel(1.5)))+
+        strip.text = element_text(size = rel(1.5)),
+        panel.border=element_rect(colour="black",size=1))+
   theme(axis.text = element_text(size = rel(1.5)),
         axis.title = element_text(size = rel(1.5)))
 
 bottom_row <- plot_grid(threeYlwBats, nnDist, labels = c('B', 'C'),
                         label_size = 26, ncol = 2) #size 18 for pdf, 22 for png
 
-png("./output/Fig 1 - CompositeTrackingIsla_maps_Distances.png", width = 1800, height = 1125)
+png("./output/Fig 1 - CompositeTrackingIsla_maps_Distances 2022-03-21.png", width = 1800, height = 1125)
 plot_grid(bocasStudyMap, bottom_row, labels = c('A', ''), 
           label_size = 26, nrow = 2)
 dev.off()

@@ -9,7 +9,7 @@ groupIDS <- hast_df %>% group_by(groupID, batID) %>%
   dplyr::summarize(nlocs = length(location.lat)) %>% 
   arrange(batID) %>% 
   as.data.frame()
-groupIDS$groupNo <- recode(groupIDS$groupID, blue = 1, brown = 2, yellow = 3)
+groupIDS$groupNo <- dplyr::recode(groupIDS$groupID, blue = 1, brown = 2, yellow = 3)
 
 batNos <- groupIDS %>% arrange(groupID, batID) 
 batNos$batNo = seq(1,18, by=1)
@@ -54,7 +54,8 @@ add_shape("triangle", clip=shapes("circle")$clip,
           plot=mytriangle)
 
 #Assign shape and color to each bat ID####
-coul <- viridisLite::viridis(6)[c(3, 4, 6)]
+#coul <- viridisLite::viridis(6)[c(3, 4, 6)]
+coul <- viridisLite::plasma(9)[c(1, 5, 8)]
 shape <- c("square", "circle", "triangle")
 node.colors <-  coul[groupIDS$groupNo]
 node.shape <- shape[groupIDS$groupNo]
@@ -62,7 +63,7 @@ set.seed(2)
 
 #Get the layout. Manipulate in tkplot & then save the coordinates. 
 #Guide: https://kateto.net/netscix2016.html
-g_tk <- tkplot(g, vertex.color=node.colors, vertex.label = batNos$batNo)
+g_tk <- tkplot(g, vertex.color=node.colors, vertex.label = batNos$batNo, vertex.label.color= "white")
 lay <- tk_coords(g_tk)
 
 ## Metrics for all individuals in all group spatial network ####
@@ -111,7 +112,7 @@ nightVals <- nightVals %>% left_join(patchCommun)
 save(nightVals, file = "./data/10_NightSummariesNets.Rdata")
 
 V(gP)$color <- node.colors
-gP_tk <- tkplot(gP, vertex.label = batNos$batNo)
+gP_tk <- tkplot(gP, vertex.label = batNos$batNo, vertex.label.color= "white")
 layP <- tk_coords(gP_tk)
 
 #save(lay, layP, file = "./data/NetworkLayouts.Rdata")
@@ -120,7 +121,8 @@ plot(gP, layout=layP,
      vertex.label = batNos$batNo, 
      vertex.shape = node.shape,
      edge.width=E(g)$weight*100, 
-     edge.color="grey50", 
+     edge.color="grey50",
+     vertex.label.color= "white",
      edge.curved=0.3, 
      mark.groups = list(gr1, gr2, gr3)) #plot it
 observedPatch <- data.table(
@@ -133,10 +135,11 @@ save(observedPatch, file="./data/10_ObservedPatchSocNetworkMetrics.Rdata")
 
 # Figure S4. A) Proximity networks of simultaneous spatial associations (same space, same time); B) networks of across-night foraging patch associations (same space, different time). Individual bats are shown as part of their social group (group 1: blue square, group 2: green circle, group 3: yellow triangle. Foraging patch communities are highlighted by the size of their membership (community 1: red, community 2: green, community 3: purple).
 
-pdf("./output/SpatialPatchNetworks.pdf", width = 10, height = 6)
+pdf("./output/Fig S4 SpatialPatchNetworks.pdf", width = 10, height = 6)
 par(mfrow=c(1,2))
 plot(g, vertex.color=node.colors, vertex.shape = node.shape,
      layout=lay, vertex.label = batNos$batNo,
+     vertex.label.color= "white",
      edge.width=E(g)$weight*50, 
      edge.color="grey50", 
      edge.curved=0.2)
@@ -145,7 +148,8 @@ title("A")
 plot(gP, layout=layP, 
      vertex.label = batNos$batNo, 
      vertex.shape = node.shape,
-     edge.width=E(g)$weight*10, 
+     edge.width=E(g)$weight*10,
+     vertex.label.color= "white",
      edge.color="grey50", 
      edge.curved=0.1, 
      mark.groups = list(gr1, gr2, gr3))

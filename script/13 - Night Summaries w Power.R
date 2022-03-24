@@ -31,7 +31,23 @@ nightSums <- hastMorph %>% group_by(groupID, batID, batIDday) %>%
   mutate(Pmet.unTracked.kJ = (timeLeftDay.min * 23.8/60 * bodymass)/1000, 
          dee.kJ = Pmet.unTracked.kJ + Pmet.kJ, 
          nFeedingClusters = nClus2 + nClus3 + nClus4)
-#Add in activity sums for each night.
+
+#Individual summary table
+individualSums <- nightSums %>% group_by(batID) %>% 
+  summarize(nightsTracked = n(),
+            meanTimeTracked = mean(timeTrack.min, na.rm=T),
+            sdTimeTracked = sd(timeTrack.min, na.rm=T),
+            meanLocs = mean(nlocs, na.rm=T),
+            sdLocs = sd(nlocs, na.rm=T),
+            meanPatches = mean(nPatches, na.rm=T),
+            meanFeedingClusters = mean(nFeedingClusters, na.rm=T),
+            sdFeedingCluster = sd(nFeedingClusters, na.rm=T),
+            sdPatches = sd(nPatches, na.rm=T),
+            meanDEE = mean(dee.kJ, na.rm=T),
+            sdDEE = sd(dee.kJ, na.rm=T))
+write.csv(individualSums, file = "./output/IndividualSums.csv", row.names = FALSE)
+
+ #Add in activity sums for each night.
 actBudg <- hastMorph %>% group_by(groupID, batID, batIDday, newState) %>% 
   dplyr::summarize(nlocs = n()) %>% 
   mutate(stateFreq = nlocs / sum(nlocs)) %>% 
@@ -39,7 +55,19 @@ actBudg <- hastMorph %>% group_by(groupID, batID, batIDday, newState) %>%
   pivot_wider(names_from = newState, values_from = stateFreq) %>% 
   dplyr::select(-`NA`)
 
-nightSums <- nightSums %>% left_join(actBudg)
+actBudgTime <- hastMorph %>% 
+  group_by(groupID, batID, batIDday, newState) %>% 
+  dplyr::summarize(nStateObs = n(),
+                   nStateTime = sum(tlag, na.rm = TRUE)) %>%
+  ungroup() %>% 
+  dplyr::group_by(groupID, batID, batIDday) %>% 
+  mutate(dayTime = sum(nStateTime),
+         stateFreqTime = nStateTime / dayTime) %>% 
+  dplyr::select(-dayTime, -nStateObs, -nStateTime) %>% 
+  pivot_wider(names_from = newState, values_from = stateFreqTime) %>% 
+  dplyr::select(-`NA`)
+
+nightSums <- nightSums %>% left_join(actBudgTime)
 
   
   #can I also add in time to first patch & first flower?
@@ -82,11 +110,3 @@ nightNets <- nightNets %>% mutate(firstFixDist = firstFixDist/1000,
 save(nightNets, file = "./data/13_NightSumValues.Rdata")
 
 #These data are used for Figure 3, Figure 4, Figure S2
-
-
-###Explore effects of time tracking ####
-tDist.m <- lmer(totalDistance~timeTrack.min+(1|batID), data=nightNets)
-fd.m <-  lmer(timeTrack.min~firstFixDist+(1|batID), data=nightNets)
-ld.m <-  lmer(timeTrack.min~lastFixDist+(1|batID), data=nightNets)
-t.m <- lmer(dee.kJ~timeTrack.min+(1|batID), data=nightNets)
-e.m <- lmer(Pmet.kJ~timeTrack.min+(1|batID), data=nightNets)

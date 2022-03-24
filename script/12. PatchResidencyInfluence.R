@@ -80,7 +80,7 @@ pairDist <- hast_df %>% group_by(groupID, batID, behaviour, otherBat) %>%
 
 #I now have if the patch the bat is in stays the same and the sequence of being in a patch for each individual. `patchBout` is NA when the bat is not in a patch, but numeric otherwise. `patchBout` should be the variable that each bat night is split by to test how bat behavior *in a patch* is influenced by a given variable.
 
-#What are they doing when they are in the same patch? They are mostly resting. Resting is much more frequent than other bats whent they are in the same patch.
+#What are they doing when they are in the same patch? They are mostly resting. Resting is much more frequent when they are in the same patch.
 samePatch <- patchStay_df %>%  group_by(batIDday, patchID, samePatch, newState) %>% 
   dplyr::summarise(sumTime = sum(tlag)) %>% 
   mutate(freqTime = sumTime / sum(sumTime))

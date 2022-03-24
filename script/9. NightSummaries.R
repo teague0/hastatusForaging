@@ -11,7 +11,7 @@ dups <- which(duplicated(hastP$event.id) ==FALSE)
 hastStart <- hastP[dups,]
 
 
-#Recalculate timelag by batDay. This eliminates very long timelags that were caluculated per animal ID ####
+#Recalculate timelag by batDay. This eliminates very long timelags that were calculated per animal ID ####
 #Timelag goes to the second point. 
 hastL <- split(hastStart, f = hastStart$batIDday)
 

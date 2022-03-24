@@ -1,4 +1,4 @@
-#Create consistent naming for foraging sites. This repeats some of the analysis in 4. ForagingMCPareas.R, but will add in the centroid, calculate teh distances among centroids and figure out a cutoff for merging these areas.
+#Create consistent naming for foraging sites. This repeats some of the analysis in 4. ForagingMCPareas.R, but will add in the centroid, calculate the distances among centroids and figure out a cutoff for merging these areas.
 
 library(tidyverse)
 library(lubridate)
@@ -105,6 +105,7 @@ hastPairsDupLoc$batIDday_clus <- paste0(hastPairsDupLoc$batIDday, ".", hastPairs
 hastPairsDupLoc <- dplyr::left_join(hastPairsDupLoc, patchNames)
 
 forage <- hastPairsDupLoc %>% filter(behaviour == "forage")
+
 #Recalculate patch areas from the re-classified patchIDs ####
 patchGPSptsL <- split(forage, f=forage$patchID) 
 patchAreaL <- lapply(patchGPSptsL, function(x){
@@ -120,6 +121,13 @@ patchAreaL <- lapply(patchGPSptsL, function(x){
   return(dat)
 })
 patchAreas <- do.call("rbind", patchAreaL)
+
+#Distance between patches
+patchesSp <- SpatialPoints(cbind(patchAreas$patchCent.x, patchAreas$patchCent.y), proj4string = CRS("+proj=utm +zone=17 +datum=WGS84"))
+eucDist <- sp::spDists(patchesSp, longlat = FALSE)
+# mean(eucDist)
+# median(eucDist)
+# sd(eucDist)
 
 #Load coordinates of cave to calculate distance
 coords <- cbind(-82.271541, 9.396448)
