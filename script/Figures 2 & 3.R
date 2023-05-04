@@ -2,7 +2,10 @@
 
 library(tidyverse)
 library(lme4)
+library(car)
+library(MuMIn)
 library(cowplot)
+library(lubridate)
 theme_set(theme_cowplot())
 library(gghalves)
 
@@ -43,12 +46,14 @@ r.squaredGLMM(mAb)
 
 greycols <- c("#808080", "#DCDCDC")
 
-actBudgInOut <- comboActBudg %>% 
+actBudgInOut <- comboActBudg %>%
+  filter(stateInOut != "state4out") %>%
+  filter(stateInOut != "state4in") %>% 
   ggplot()+
   geom_half_boxplot(aes(x = stateInOut, y = freq, fill = inOut), alpha = 0.6)+
   geom_half_point(aes(x = stateInOut, y = freq, fill = inOut, color = groupID), position=position_jitter(width = 0.1))+
-  scale_x_discrete(breaks = c("state1in", "state1out", "state2in","state2out", "state3in","state3out","state4in","state4out"),
-                   labels = c("         rest", "", "         slow\n          flight","","          move","","             commute",""))+
+  scale_x_discrete(breaks = c("state1in", "state1out", "state2in","state2out", "state3in","state3out"),
+                   labels = c("         rest", "", "         slow\n          flight","","          move",""))+
   scale_fill_manual(values = greycols,
                      name = "", 
                      breaks = c("in", "out"),
@@ -56,15 +61,17 @@ actBudgInOut <- comboActBudg %>%
   scale_color_manual(values = mycols, 
                      name = "", 
                      breaks = c("blue", "brown", "yellow"),
-                     labels = c("Group 1", "Group 2", "Group 3"))+
+                     labels = c("Group 1", "Group 2", "Group 3"))+ #only plots the fill guide for this plot. Color goes on panel B
   labs(x = "", 
-       y = "proportion of time",
-       subtitle = "Activity budgets of when nearest neighbors\nare in the same or a different patch")+
-  theme(legend.position = c(0.75, 0.7), 
+       y = "proportion of time")+
+       #subtitle = "Activity budgets of when nearest neighbors\nare in the same or a different patch")+
+  theme(legend.position = "bottom",
+        legend.box = "horizontal", 
         legend.background = element_blank(),
         legend.title = element_blank(),
         axis.title.x = element_text(hjust=1),
-        axis.ticks.x = element_blank())
+        axis.ticks.x = element_blank())+
+  guides(color = "none")
 actBudgInOut
 
 m.restAb <- glmer(freq~inOut+(1|batID:groupID), family = "binomial", data = comboActBudg[comboActBudg$newState == "state1",])
@@ -77,7 +84,7 @@ comboActBudg %>% dplyr::filter(newState == "state1") %>%
   dplyr::summarize(median = median(freq),
                    mad = mad(freq))
 
-m.slowAb <- lm(freq~samePatch, family = "binomial", data = comboActBudg[comboActBudg$newState == "state2",])
+m.slowAb <- lm(freq~inOut, family = "binomial", data = comboActBudg[comboActBudg$newState == "state2",])
 summary(m.slowAb)
 anova(m.slowAb)
 
@@ -89,58 +96,82 @@ m.commAb <- lm(freq~samePatch, family = "binomial", data = comboActBudg[comboAct
 summary(m.commAb)
 anova(m.commAb)
 
-# What about synchronization of behavior in a patch? ####
+# What about synchronization of behavior in a patch vs out of a patch? Out of a patch provides the backdrop for just how synchronized behavior could be by chance ####
 #Group slow flight & move into the same behavior
 load("./data/12_AllBatsSamePatch.Rdata")
-inPatch <- forage %>% filter(samePatch == 1)
-inPatch$batStateRecode <- NA
-inPatch$otherBatStateRecode <- NA
-inPatch$sameBehav <- NA
-for(i in 1:length(inPatch$newState)){
-  inPatch$batStateRecode[i] <- ifelse(inPatch$newState[i] == "state2", "forage", 
-                                      ifelse(inPatch$newState[i] == "state3", "forage", inPatch$newState[i]))
-  inPatch$otherBatStateRecode[i] <- ifelse(inPatch$otherBatState[i] == "state2", "forage", 
-                                          ifelse(inPatch$otherBatState[i] == "state3", "forage", inPatch$otherBatState[i]))
-}
+syncBehav <- forage
+syncBehav$batStateRecode <- NA
+syncBehav$otherBatStateRecode <- NA
+syncBehav$sameBehav <- NA
 
-inPatch$sameBehav <- ifelse(inPatch$batStateRecode == inPatch$otherBatStateRecode,"sameBehav", "diffBehav")
-inPatch$sameBehav_orig <- ifelse(inPatch$newState == inPatch$otherBatState,"sameBehav", "diffBehav")
+syncBehav$sameBehav <- ifelse(syncBehav$newState == syncBehav$otherBatState,"sameBehav", "diffBehav")
 
-#Calculate the frequency of synchronization for each behavior for each bat day.
-sameSums <- inPatch %>% 
-  dplyr::filter(sameBehav == "sameBehav") %>% 
-  dplyr::group_by(groupID, batID, batIDday, newState) %>% 
+#Calculate the frequency of synchronization for each behavior in or out of the same patch for each bat day.
+inSameSums <- syncBehav %>%
+  dplyr::filter(sameBehav == sameBehav) %>% 
+  dplyr::group_by(groupID, batID, batIDday, samePatch, newState) %>% 
+  dplyr::summarize(synchStateObs = n()) %>% 
+  ungroup() %>% 
+  dplyr::group_by(groupID, batID, batIDday, samePatch) %>% 
+  dplyr::mutate(dayNobs = sum(synchStateObs), 
+                freq = synchStateObs/dayNobs) %>% 
+  filter(!is.na(newState))
+inSameSums$inOut <- dplyr::recode(as.character(inSameSums$samePatch), "0" = "out", "1" = "in")
+
+outSameSums <- syncBehav %>%
+  dplyr::filter(samePatch == 0, !is.na(sameBehav)) %>% 
+  dplyr::group_by(groupID, batID, batIDday, newState, sameBehav) %>% 
   dplyr::summarize(synchStateObs = n()) %>% 
   ungroup() %>% 
   dplyr::group_by(groupID, batID, batIDday) %>% 
   dplyr::mutate(dayNobs = sum(synchStateObs), 
-                freq = synchStateObs/dayNobs)
+                freq = synchStateObs/dayNobs) %>% 
+  filter(!is.na(newState))
+outSameSums$samePatch <- 0
+outSameSums$inOut <- dplyr::recode(as.character(outSameSums$samePatch), "0" = "out", "1" = "in")
+
+comboSameSums <-full_join(inSameSums,outSameSums)
+
+
+comboSameSums$stateInOut <- paste0(comboSameSums$newState, comboSameSums$samePatch)
+inSameSums$stateInOut <- paste0(inSameSums$newState, inSameSums$inOut)
 
 library(gghalves)
-q1 <- glmer(freq~newState+(1|batID), family = "binomial", data = sameSums)
-q1 <- lm(freq~newState, family = "binomial", data = sameSums)
+q1 <- glmer(freq~newState*samePatch+(1|batID), 
+            family = "binomial", data = inSameSums)
 Anova(q1)
 summary(q1)
+library(multcomp)
+glht(q1, linfct = mcp(newState = "Tukey"))
 
-
-behavSameFreq <- sameSums %>% 
+behavSameFreq <- inSameSums %>% 
+  filter(stateInOut != "state4out") %>%
+  filter(stateInOut != "state4in") %>% 
   ggplot()+
-  geom_half_boxplot(aes(x = newState, y = freq), nudge = 0.02, outlier.color = NA) +
-  geom_half_point(aes(x = newState, y = freq, color = groupID), size = 2, shape = 16, position=position_jitter(width = 0.1))+
-  scale_x_discrete(breaks = c("state1", "state2", "state3"),
-                   labels = c("Rest", "Slow\nflight" ,"Move"))+
-  scale_fill_manual(values = mycols[2:3], 
-                    breaks = c("brown", "yellow"),
-                    labels = c("Group 2", "Group 3"))+
-  scale_color_manual(values = mycols[2:3], 
-                     breaks = c("brown", "yellow"),
-                     labels = c("Group 2", "Group 3"))+
+  geom_half_boxplot(aes(x = stateInOut, y = freq, fill = inOut), alpha = 0.6)+
+  geom_half_point(aes(x = stateInOut, y = freq, fill = inOut, color = groupID), position=position_jitter(width = 0.1))+
+  scale_x_discrete(breaks = c("state1in", "state1out", "state2in","state2out", "state3in","state3out"),
+                   labels = c("         rest", "", "         slow\n          flight","","          move",""))+
+  scale_fill_manual(values = greycols,
+                    name = "", 
+                    breaks = c("in", "out"),
+                    labels = c("Same\nPatch", "Different\nPatch"))+
+  scale_color_manual(values = mycols, 
+                     name = "", 
+                     breaks = c("blue", "brown", "yellow"),
+                     labels = c("Group 1", "Group 2", "Group 3"))+
   labs(x = "", 
-       y = "frequency", 
-       subtitle = "Behavioral sychrony of nearest neighbors\n in a patch")+
-  theme(legend.position = c(0.7, 0.9), 
-        legend.title = element_blank())
+       y = "proportion of time synchronized")+
+       #subtitle = "Behavioral synchrony of nearest neighbors\nin or out of the same patch")+
+  theme(legend.position = "bottom",
+        legend.box = "horizontal",
+        legend.background = element_blank(),
+        legend.title = element_blank(),
+        axis.title.x = element_text(hjust=1),
+        axis.ticks.x = element_blank())+
+  guides(fill = "none")
 behavSameFreq
+
 
 # How does proximity affect rest? ####
 #This will start with a behavioral change point analysis to count up behavioral sequences.
@@ -159,11 +190,34 @@ behavBoutTimeDist <- patchStay_df %>% filter(otherDist < 100) %>%
 stateNo <- c("state1", "state2", "state3", "state4")
 behavName <- c("rest", "slow flight" ,"move", "commute")
 names(behavName) <- stateNo
+
 #At least with this figure, being in close proximity increases the duration of rest. Try to find an non-linear fit for rest
 restProx <- behavBoutTimeDist %>% filter(newState == "state1")
 batIDday_group <- patchStay_df %>% dplyr::select(batIDday, groupID) %>% 
   distinct()
 restProx <- restProx %>% left_join(batIDday_group)
+#ranges for a reviewer
+patchStay_df %>% filter(newState == "state1") %>% 
+  summarize(min = min(otherDist, na.rm = TRUE),
+            max = max(otherDist, na.rm = TRUE))
+
+library(hms)
+patchStay_df$PAtime <- with_tz(patchStay_df$timestamp)
+patchStay_df$PAtime_hms <- hms::as_hms(patchStay_df$PAtime)
+
+
+
+
+dist290 <- patchStay_df %>%
+  filter(otherDist < 291) %>% 
+batDists <- 
+  ggplot()+
+  geom_density(aes(hms(timestamp), y = otherDist, fill = groupID), alpha = 0.6)+
+  scale_color_manual(values = mycols, 
+                     name = "", 
+                     breaks = c("blue", "brown", "yellow"),
+                     labels = c("Group 1", "Group 2", "Group 3"))
+batDists
 
 #library(remotes)
 #install_github("OnofriAndreaPG/aomisc")
@@ -176,8 +230,6 @@ demo.fits <- expand.grid(minDistNN=seq(0.1, 100, length=100))
 # new data with predictions
 pm <- predict(model, newdata=demo.fits, interval="confidence") 
 demo.fits$time <- pm
-demo.fits$pmin <- pm[,2]
-demo.fits$pmax <- pm[,3]
 
 #Plot
 distRestDur <- ggplot(restProx)+
@@ -195,12 +247,15 @@ distRestDur <- ggplot(restProx)+
         legend.title = element_blank())
   
 
-top_row <- plot_grid(actBudgOut, actBudgIn, labels = c('A', 'B'), label_size = 12, ncol = 2)
-bottom_row <- plot_grid(behavSameFreq, distRestDur, labels = c('C', 'D'), label_size = 12, ncol = 2)
-
-pdf("./output/Fig 2 - Patch & Distance Effects on Behavior.pdf", width = 8, height = 4)
-plot_grid(actBudgInOut, distRestDur, labels = c('A', 'B'), label_size = 12, ncol = 2)
+pdf("./output/Fig 2 - Patch & Distance Effects on Behavior.pdf", width = 8, height = 6)
+plot_grid(actBudgInOut, behavSameFreq, labels = c('A', 'B'), label_size = 12, ncol = 2)
 dev.off()
+
+pdf("./output/Fig 3 - Distance Effects on rest.pdf", width = 4, height = 4)
+plot_grid(distRestDur)
+dev.off()
+
+
 
 
 

@@ -8,7 +8,7 @@ library(car)
 load("./data/11_HastatusSegStateBiodatPwr.Rdata") #hastMorph
 
 ##Night sums ####
-nightSums <- hastMorph %>% group_by(groupID, batID, batIDday) %>% 
+nightSums <- hastMorph %>% group_by(groupID, batID, BatDay, batIDday) %>% 
   dplyr::summarise(minTimeUTC = min(timestamps),
             maxTimeUTC = max(timestamps),
             minTimeLocal = min(with_tz(timestamps, tz="America/Panama")),
@@ -16,6 +16,8 @@ nightSums <- hastMorph %>% group_by(groupID, batID, batIDday) %>%
             timeTrack.min = round(as.numeric(as.duration(maxTimeLocal-minTimeLocal))/60, 2),
             timeLeftDay.min = 1440 - timeTrack.min,
             nlocs = n(),
+            nlocs290 = length(which(otherDist < 291)),
+            prop290 = nlocs290 / nlocs,
             meanTimeLag.s = mean(tlag, na.rm = TRUE),
             maxTimeLag.s = max(tlag, na.rm = TRUE),
             totalDistance = sum(stepLength, na.rm = TRUE)/1000,
@@ -32,6 +34,33 @@ nightSums <- hastMorph %>% group_by(groupID, batID, batIDday) %>%
          dee.kJ = Pmet.unTracked.kJ + Pmet.kJ, 
          nFeedingClusters = nClus2 + nClus3 + nClus4)
 
+#Proportion of time within 290 m)
+mean(nightSums$prop290, na.rm=T) #0.1110512
+sd(nightSums$prop290, na.rm=T) #0.1411449
+max(nightSums$prop290, na.rm = T) #0.5006399
+
+time290 <- hastMorph %>% group_by(groupID, batID, BatDay) %>% 
+  filter(otherDist < 291) %>%
+  summarize(tsum.m = sum(tlag, na.rm = T)/60)
+nightSums <- nightSums %>% left_join(time290)
+
+ggplot(nightSums)+
+  geom_point(aes(x = nFeedingClusters, y = tsum.m, color = groupID))
+ggplot(nightSums)+
+  geom_point(aes(x = dee.kJ, y = tsum.m, color = groupID))
+ggplot(nightSums)+
+  geom_point(aes(x = dee.kJ, y = nFeedingClusters, color = groupID))
+
+m.290distEE <- lmer(nFeedingClusters ~ tsum.m + (1|batID:groupID), data=nightSums)
+Anova(m.290distEE)
+
+ggplot(nightSums)+
+  geom_point(aes(x = timeTrack.min, y = tsum.m, color = groupID))
+
+ggplot(nightSums)+
+  geom_point(aes(x = tsum.m, y = dee.kJ, color = groupID))
+
+
 #Individual summary table
 individualSums <- nightSums %>% group_by(batID) %>% 
   summarize(nightsTracked = n(),
@@ -39,6 +68,8 @@ individualSums <- nightSums %>% group_by(batID) %>%
             sdTimeTracked = sd(timeTrack.min, na.rm=T),
             meanLocs = mean(nlocs, na.rm=T),
             sdLocs = sd(nlocs, na.rm=T),
+            meanDistance = round(mean(totalDistance, na.rm=T),2),
+            sdDistance = round(sd(totalDistance, na.rm=T),2),
             meanPatches = mean(nPatches, na.rm=T),
             meanFeedingClusters = mean(nFeedingClusters, na.rm=T),
             sdFeedingCluster = sd(nFeedingClusters, na.rm=T),

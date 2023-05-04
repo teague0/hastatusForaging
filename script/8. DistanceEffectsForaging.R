@@ -24,7 +24,8 @@ for(i in 1:length(partners$patchID)){
 
 #Who are relatively close to each other? Calls with peak frequency of 6725 ± 36.3 Hz travel 289.8 m using the echolocation formula, so about 2x that for another receiver. Assume a receiver communication distance of about 500 m to be very conservative (social effects at longer distances)
 
-close <- which(partners$otherDist < 500)
+#close <- which(partners$otherDist < 500)
+close <- which(partners$otherDist < 290)
 partnersClose <- partners[close,]
 
 

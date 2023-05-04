@@ -16,7 +16,7 @@ hast_L <- split(hast_df, f=hast_df$batIDday)
 lapply(hast_L, function(x){
   time_length(interval(min(x$timestamps), max(x$timestamps)), unit="mins")}) #check the interval of how long each bat was tracked per night
 
-
+### Crawl regularization ####
 #### WARNING: Go get coffee or a snack because this will take a few minutes. If running on a slower machine, then a leisurely meal is recommended ####
 
 hastLcrw <- mclapply(X=hast_L, mc.cores=detectCores()-2, FUN=function(batHMM) { 

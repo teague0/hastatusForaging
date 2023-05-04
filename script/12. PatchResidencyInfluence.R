@@ -57,6 +57,10 @@ forageLx <- lapply(forageL, function(x){
 })
 patchStay_df <- do.call("rbind", forageLx)
 
+#ranges for a reviewer
+patchStay_df$PAtime <- with_tz(patchStay_df$timestamp)
+patchStay_df$PAtime_hms <- hms::as_hms(patchStay_df$PAtime)
+
 save(patchStay_df, file="./data/12_AllBatsPatchStateSeq.Rdata")
 
 ### I want to summarize how much time is spent in each state per bout and how many bats are in the same patch as the focal.

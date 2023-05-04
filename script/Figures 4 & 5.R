@@ -52,6 +52,7 @@ hastMorph <- do.call("rbind", cumEE)
 mlNeeded <- hastMorph$cumEE.kJ / 2.007818
 flwrNeeded <- mlNeeded / 5
 
+
 # Plotting figures 3 & 4 ####
 
 #Figure 3. Relationships between proximity network strength centrality of individual bats and A) time tracked per night, B) foraging efficiency, C) DEE. ####
